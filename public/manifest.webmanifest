@@ -1,0 +1,10 @@
+{
+  "name": "MedControl NFC",
+  "short_name": "MedControl",
+  "description": "Control sencillo de medicamentos y suplementos.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f9fc",
+  "theme_color": "#2563eb",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
