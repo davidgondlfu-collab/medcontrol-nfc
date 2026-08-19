@@ -14,7 +14,8 @@ export async function createClient() {
           try {
             cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           } catch {
-            // Middleware refreshes session cookies when called from a Server Component.
+            // Server Components cannot write response cookies. The browser
+            // client will persist a refreshed session on its next auth event.
           }
         },
       },
