@@ -12,3 +12,9 @@ export type Intake = {
   method: "manual" | "nfc";
   medications: Array<{ name: string; color: string }>;
 };
+
+export type ProfileSettings = {
+  name: string;
+  nfc_duplicate_window_hours: number;
+  medication_day_cutoff_time: string;
+};
