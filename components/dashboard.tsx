@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { currentMedicationDay, DEFAULT_MEDICATION_DAY_CUTOFF, medicationDayKey } from "@/lib/medication-day";
 import type { Medication } from "@/types/database";
 
-type DashboardMedication = Pick<Medication, "id" | "name" | "description" | "photo_url" | "color" | "active" | "dose" | "unit"> & { schedules: Array<{ time: string; days_of_week: number[] }> };
+type DashboardMedication = Pick<Medication, "id" | "name" | "description" | "photo_url" | "color" | "active" | "dose" | "unit" | "usage_type"> & { schedules: Array<{ time: string; days_of_week: number[] }> };
 
 export function Dashboard() {
   const [medications, setMedications] = useState<DashboardMedication[]>([]);
@@ -21,7 +21,7 @@ export function Dashboard() {
     const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
     const [profileResult, medsResult, recentResult, latestResult] = await Promise.all([
       supabase.from("profiles").select("medication_day_cutoff_time").single(),
-      supabase.from("medications").select("id,name,description,photo_url,color,active,dose,unit,schedules(time,days_of_week)").eq("active", true),
+      supabase.from("medications").select("id,name,description,photo_url,color,active,dose,unit,usage_type,schedules(time,days_of_week)").eq("active", true),
       supabase.from("intakes").select("medication_id,taken_at,medications(name)").gte("taken_at", since).order("taken_at", { ascending: false }),
       supabase.from("intakes").select("medication_id,taken_at,medications(name)").order("taken_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
@@ -39,7 +39,7 @@ export function Dashboard() {
   useEffect(() => { load(); }, []);
   const medicationDay = currentMedicationDay(cutoff);
   const medicationWeekday = new Date(`${medicationDay}T12:00:00`).getDay();
-  const scheduled = medications.filter((medication) => medication.schedules.some((schedule) => schedule.days_of_week.includes(medicationWeekday)));
+  const scheduled = medications.filter((medication) => medication.usage_type !== "occasional" && medication.schedules.some((schedule) => schedule.days_of_week.includes(medicationWeekday)));
   const pending = scheduled.filter((medication) => !takenIds.includes(medication.id));
   const completed = scheduled.filter((medication) => takenIds.includes(medication.id));
   const upcoming = pending.flatMap((medication) => medication.schedules.filter((schedule) => schedule.days_of_week.includes(medicationWeekday)).map((schedule) => ({ name: medication.name, time: schedule.time.slice(0, 5) }))).filter((item) => item.time >= new Date().toTimeString().slice(0, 5)).sort((a, b) => a.time.localeCompare(b.time))[0];
